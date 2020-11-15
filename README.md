@@ -23,8 +23,14 @@ Blogging can involve many things so, to keep this simple, the main focus is on *
 1. **admins** can remove any published **article**
 1. **admins** can remove any posted **comment**
 
+If you think that something is missing, feel free to contact us.
+
 ### Bonus points for usage of:
 
 1. [typescript](https://www.typescriptlang.org/)
 1. [sequelize](https://sequelize.org/)
 1. [jwt](https://jwt.io/)
+1. [docker](https://www.docker.com/)
+1. [docker-compose](https://docs.docker.com/compose/)
+1. [mocha](https://mochajs.org/) or any other testing library
+1. [eslint](https://eslint.org/) ([typescript-eslint](https://github.com/typescript-eslint/typescript-eslint))

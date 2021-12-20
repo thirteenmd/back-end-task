@@ -19,6 +19,10 @@ Blogging can involve many things so, to keep this simple, the main focus is on *
 1. **admins** can do everything **bloggers** can do
 1. **admins** can remove any public **post**
 
+There is an incomplete implementation in this repo in order to skip through setup and to test your skill of working with an existing codebase, but there are no restrictions to what can be changed, so you can rewrite the whole thing from scratch. If you choose to start with this then fork this repo so that it will easier to see all the changes. There are also a couple of TODOs which you'll have to do and there may or may not be bugs, so good luck.
+
+I would recommend the eslint extension for vscode (dbaeumer.vscode-eslint) since this project is already configured for it.
+
 If you think that something is missing, feel free to contact us.
 
 ### Bonus points for usage of:

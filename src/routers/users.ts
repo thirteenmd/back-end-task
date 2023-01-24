@@ -1,5 +1,6 @@
 import { Router, RequestHandler } from 'express';
 import { Op } from 'sequelize';
+import * as bcryptjs from 'bcryptjs';
 
 import type { SequelizeClient } from '../sequelize';
 import type { User } from '../repositories/types';
@@ -20,7 +21,7 @@ export function initUsersRouter(sequelizeClient: SequelizeClient): Router {
     .post(tokenValidation, adminValidation, initCreateUserRequestHandler(sequelizeClient));
 
   router.route('/login')
-    .post(tokenValidation, initLoginUserRequestHandler(sequelizeClient));
+    .post(initLoginUserRequestHandler(sequelizeClient));
   router.route('/register')
     .post(initRegisterUserRequestHandler(sequelizeClient));
 
@@ -79,11 +80,12 @@ function initLoginUserRequestHandler(sequelizeClient: SequelizeClient): RequestH
         where: { email },
         raw: true,
       }) as Pick<User, 'id' | 'passwordHash'> | null;
+      
       if (!user) {
         throw new UnauthorizedError('EMAIL_OR_PASSWORD_INCORRECT');
       }
 
-      if (user.passwordHash !== hashPassword(password)) {
+      if (!(await bcryptjs.compare(password, user.passwordHash))){
         throw new UnauthorizedError('EMAIL_OR_PASSWORD_INCORRECT');
       }
 
@@ -135,7 +137,9 @@ async function createUser(data: CreateUserData, sequelizeClient: SequelizeClient
     }
   }
 
-  await models.users.create({ type, name, email, passwordHash: password });
+  const passwordHash: string = await hashPassword(password);
+
+  await models.users.create({ type, name, email, passwordHash });
 }
 
 type CreateUserData = Pick<User, 'type' | 'name' | 'email'> & { password: User['passwordHash'] };

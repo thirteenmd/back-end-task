@@ -15,7 +15,6 @@ export function isValidToken(token: string): boolean  {
   return !!jwt.verify(token, process.env.JWT_SECRET as string) as unknown as boolean;
 }
 
-// NOTE(roman): assuming that `isValidToken` will be called before
 export function extraDataFromToken(token: string): TokenData  {
   return jwt.verify(token, process.env.JWT_SECRET as string) as unknown as TokenData;
 }

@@ -61,3 +61,7 @@ export interface RequestAuth {
   token: string;
   user: User;
 }
+
+export interface RequestParams {
+  id: string
+}

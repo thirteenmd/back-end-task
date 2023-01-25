@@ -2,7 +2,7 @@ import express from 'express';
 import 'dotenv/config';
 
 import { initSequelizeClient } from './sequelize';
-import { initUsersRouter } from './routers';
+import { initUsersRouter, initPostsRouter } from './routers';
 import { initErrorRequestHandler, initNotFoundRequestHandler } from './middleware';
 import { Dialect } from 'sequelize/dist';
 
@@ -11,8 +11,6 @@ const PORT = process.env.PORT as string;
 async function main(): Promise<void> {
   const app = express();
 
-  // TODO(roman): store these credentials in some external configs
-  // so that they don't end up in the git repo
   const sequelizeClient = await initSequelizeClient({
     dialect: process.env.DB_DIALECT as Dialect,
     host: process.env.DB_HOST as string,
@@ -25,6 +23,7 @@ async function main(): Promise<void> {
   app.use(express.json());
 
   app.use('/api/v1/users', initUsersRouter(sequelizeClient));
+  app.use('/api/v1/posts', initPostsRouter(sequelizeClient));
 
   app.use('/', initNotFoundRequestHandler());
 

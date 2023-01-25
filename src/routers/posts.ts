@@ -50,7 +50,13 @@ function initCreatePostsRequesHandler(sequelizeClient: SequelizeClient): Request
     try {
       const { title, content } = req.body as  Omit<CreatePostData, 'authorId'>; 
       const { auth: { user: { id: authorId } } } = req as unknown as { auth: RequestAuth };
+      if(!title) {
+        throw new BadRequestError('TITLE_REQUIRED');
+      }
 
+      if(!content) {
+        throw new BadRequestError('CONTENT_REQUIRED');
+      }
       const similarPost = await models.posts.findOne({
         attributes: ['id', 'title', 'content'],
         where: {
@@ -79,8 +85,6 @@ function initCreatePostsRequesHandler(sequelizeClient: SequelizeClient): Request
   };
 }
 
-type CreatePostData = Pick<Post, 'title' | 'content' | 'authorId' | 'isHidden'>;
-
 function initEditPostRequestHandler(sequelizeClient: SequelizeClient): RequestHandler{
   return async function editPostRequestHandler(req, res, next) {
     const { models } = sequelizeClient;
@@ -89,6 +93,14 @@ function initEditPostRequestHandler(sequelizeClient: SequelizeClient): RequestHa
       const { title, content, isHidden } = req.body as  Omit<CreatePostData, 'authorId'>; 
       const { auth: { user: { id: authorId } } } = req as unknown as { auth: RequestAuth };
       const { params: { id: postId } } = req as unknown as { params: RequestParams };
+
+      if(!title || !content) {
+        throw new BadRequestError('TITLE_AND_CONTENT_REQUIRED');
+      }
+
+      if(!postId) {
+        throw new BadRequestError('POSTID_REQUIRED');
+      }
 
       const postToUpdate = await models.posts.findOne({
         where: {
@@ -132,6 +144,10 @@ function initDeletePostRequestHandler(sequelizeClient: SequelizeClient): Request
       const { auth: { user: { id: userId, type: userType } } } = req as unknown as { auth: RequestAuth };
       const { params: { id: postId } } = req as unknown as { params: RequestParams };
 
+      if(!postId) {
+        throw new BadRequestError('POSTID_REQUIRED');
+      }
+
       const isAdmin = userType === UserType.ADMIN;
 
       const postToDelete = await models.posts.findOne({
@@ -166,3 +182,5 @@ function initDeletePostRequestHandler(sequelizeClient: SequelizeClient): Request
     }
   };
 }
+
+type CreatePostData = Pick<Post, 'title' | 'content' | 'authorId' | 'isHidden'>;

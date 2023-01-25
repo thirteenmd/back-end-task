@@ -55,8 +55,23 @@ function initListUsersRequestHandler(sequelizeClient: SequelizeClient): RequestH
 function initCreateUserRequestHandler(sequelizeClient: SequelizeClient): RequestHandler {
   return async function createUserRequestHandler(req, res, next): Promise<void> {
     try {
-      // NOTE(roman): missing validation and cleaning
       const { type, name, email, password } = req.body as CreateUserData;
+
+      if(!type) {
+        throw new BadRequestError('TYPE_REQUIRED');
+      }
+
+      if(!name) {
+        throw new BadRequestError('NAME_REQUIRED');
+      }
+
+      if(!email) {
+        throw new BadRequestError('EMAIL_REQUIRED');
+      }
+
+      if(!password) {
+        throw new BadRequestError('PASSWORD_REQUIRED');
+      }
 
       await createUser({ type, name, email, password }, sequelizeClient);
 
@@ -72,8 +87,15 @@ function initLoginUserRequestHandler(sequelizeClient: SequelizeClient): RequestH
     const { models } = sequelizeClient;
 
     try {
-      // NOTE(roman): missing validation and cleaning
       const { email, password } = req.body as { name: string; email: string; password: string };
+
+      if(!email) {
+        throw new BadRequestError('EMAIL_REQUIRED');
+      }
+
+      if(!password) {
+        throw new BadRequestError('PASSWORD_REQUIRED');
+      }
 
       const user = await models.users.findOne({
         attributes: ['id', 'passwordHash'],
@@ -101,9 +123,20 @@ function initLoginUserRequestHandler(sequelizeClient: SequelizeClient): RequestH
 function initRegisterUserRequestHandler(sequelizeClient: SequelizeClient): RequestHandler {
   return async function createUserRequestHandler(req, res, next): Promise<void> {
     try {
-      // NOTE(roman): missing validation and cleaning
       const { name, email, password } = req.body as Omit<CreateUserData, 'type'>;
 
+      if(!name) {
+        throw new BadRequestError('NAME_REQUIRED');
+      }
+
+      if(!email) {
+        throw new BadRequestError('EMAIL_REQUIRED');
+      }
+
+      if(!password) {
+        throw new BadRequestError('PASSWORD_REQUIRED');
+      }
+      
       await createUser({ type: UserType.BLOGGER, name, email, password }, sequelizeClient);
 
       return res.status(204).end();

@@ -1,29 +1,23 @@
-import { NotImplementedError } from './errors';
 import * as bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 export async function hashPassword(password: string): Promise<string> {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-  const salt: string = await bcryptjs.genSalt(10);
+  const salt: string = await bcryptjs.genSalt(10) as unknown as string;
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-  return await bcryptjs.hash(password, salt);
+  return await bcryptjs.hash(password, salt) as unknown as Promise<string>;
 }
 
 export function generateToken(data: TokenData): string {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-  return jwt.sign(data, process.env.JWT_SECRET as string, {expiresIn: '30d'});
+  return jwt.sign(data, process.env.JWT_SECRET as string, {expiresIn: '30d'}) as unknown as string;
 }
 
 export function isValidToken(token: string): boolean  {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  return !!jwt.verify(token, process.env.JWT_SECRET as string);
+  return !!jwt.verify(token, process.env.JWT_SECRET as string) as unknown as boolean;
 }
 
 // NOTE(roman): assuming that `isValidToken` will be called before
 export function extraDataFromToken(token: string): TokenData  {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  return jwt.verify(token, process.env.JWT_SECRET as string) as TokenData;
+  return jwt.verify(token, process.env.JWT_SECRET as string) as unknown as TokenData;
 }
 
 export interface TokenData {

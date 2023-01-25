@@ -15,16 +15,17 @@ export function initPostsRouter(sequelizeClient: SequelizeClient): Router {
 
   router.route('/')
     .get(tokenValidation, initListPostsRequesHandler(sequelizeClient))
-    .post(tokenValidation, initCreatePostsRequesHandler(sequelizeClient));
+    .post(tokenValidation, initCreatePostRequesHandler(sequelizeClient));
   
   router.route('/:id')
-    .post(tokenValidation, initEditPostRequestHandler(sequelizeClient))
+    .get(tokenValidation, initViewPostsRequesHandler(sequelizeClient))
+    .put(tokenValidation, initEditPostRequestHandler(sequelizeClient))
     .delete(tokenValidation, initDeletePostRequestHandler(sequelizeClient));
 
   return router;
 }
 
-function initListPostsRequesHandler(sequelizeClient: SequelizeClient): import('express-serve-static-core').RequestHandler<{}, any, any, import('qs').ParsedQs, Record<string, any>> {
+function initListPostsRequesHandler(sequelizeClient: SequelizeClient): RequestHandler {
   return async function listPostsRequestHandler(req, res, next): Promise<void> {
     const { models } = sequelizeClient;
 
@@ -43,8 +44,8 @@ function initListPostsRequesHandler(sequelizeClient: SequelizeClient): import('e
   };
 }
 
-function initCreatePostsRequesHandler(sequelizeClient: SequelizeClient): RequestHandler {
-  return async function reactePostsRequestHandler(req, res, next): Promise<void> {
+function initCreatePostRequesHandler(sequelizeClient: SequelizeClient): RequestHandler {
+  return async function reactePostRequestHandler(req, res, next): Promise<void> {
     const { models } = sequelizeClient;
 
     try {
@@ -57,6 +58,7 @@ function initCreatePostsRequesHandler(sequelizeClient: SequelizeClient): Request
       if(!content) {
         throw new BadRequestError('CONTENT_REQUIRED');
       }
+
       const similarPost = await models.posts.findOne({
         attributes: ['id', 'title', 'content'],
         where: {
@@ -85,6 +87,34 @@ function initCreatePostsRequesHandler(sequelizeClient: SequelizeClient): Request
   };
 }
 
+
+function initViewPostsRequesHandler(sequelizeClient: SequelizeClient): RequestHandler {
+  return async function viewPostsRequestHandler(req, res, next): Promise<void> {
+    const { models } = sequelizeClient;
+
+    try {
+      const { auth: { user: { id: userId } } } = req as unknown as { auth: RequestAuth };
+      const { params: { id: postId } } = req as unknown as { params: RequestParams };
+
+      const foundPost = await models.posts.findOne({where: {id: postId}});
+      
+      if(!foundPost){
+        throw new BadRequestError('POST_NOT_FOUND');
+      }
+
+      if(foundPost.authorId !== userId && foundPost.isHidden){
+        throw new BadRequestError('POST_NOT_FOUND');
+      }
+
+      res.send(foundPost);
+
+      return res.end();
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
 function initEditPostRequestHandler(sequelizeClient: SequelizeClient): RequestHandler{
   return async function editPostRequestHandler(req, res, next) {
     const { models } = sequelizeClient;
@@ -100,6 +130,25 @@ function initEditPostRequestHandler(sequelizeClient: SequelizeClient): RequestHa
 
       if(!postId) {
         throw new BadRequestError('POSTID_REQUIRED');
+      }
+
+      const similarPost = await models.posts.findOne({
+        attributes: ['id', 'title', 'content'],
+        where: {
+          [Op.or]: [
+            { title },
+            { content },
+          ],
+        },
+      }) as Pick<Post, 'title' | 'content'> | null;
+
+      if(similarPost){
+        if(similarPost.title){
+          throw new BadRequestError('TITLE_ALREADY_EXISTS');
+        }
+        if(similarPost.content){
+          throw new BadRequestError('CONTENT_ALREADY_EXISTS');
+        }
       }
 
       const postToUpdate = await models.posts.findOne({

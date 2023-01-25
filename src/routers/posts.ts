@@ -25,7 +25,6 @@ export function initPostsRouter(sequelizeClient: SequelizeClient): Router {
 }
 
 function initListPostsRequesHandler(sequelizeClient: SequelizeClient): import('express-serve-static-core').RequestHandler<{}, any, any, import('qs').ParsedQs, Record<string, any>> {
-  //lists all public posts by the rest of users and all user's post doesn't matter is public or not
   return async function listPostsRequestHandler(req, res, next): Promise<void> {
     const { models } = sequelizeClient;
 
@@ -45,7 +44,6 @@ function initListPostsRequesHandler(sequelizeClient: SequelizeClient): import('e
 }
 
 function initCreatePostsRequesHandler(sequelizeClient: SequelizeClient): RequestHandler {
-  //creates a post for the logged in user
   return async function reactePostsRequestHandler(req, res, next): Promise<void> {
     const { models } = sequelizeClient;
 

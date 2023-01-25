@@ -3,7 +3,7 @@ import { RequestHandler } from 'express';
 import type { SequelizeClient } from '../sequelize';
 import type { User } from '../repositories/types';
 
-import { UnauthorizedError, ForbiddenError, NotImplementedError } from '../errors';
+import { UnauthorizedError } from '../errors';
 import { isValidToken, extraDataFromToken } from '../security';
 import { UserType } from '../constants';
 
@@ -53,7 +53,19 @@ export function initTokenValidationRequestHandler(sequelizeClient: SequelizeClie
 // NOTE(roman): assuming that `tokenValidationRequestHandler` is placed before
 export function initAdminValidationRequestHandler(): RequestHandler {
   return function adminValidationRequestHandler(req, res, next): void {
-    throw new NotImplementedError('ADMIN_VALIDATION_NOT_IMPLEMENTED_YET');
+    try {
+      const { auth: { user: { type: userType } } } = req as unknown as { auth: RequestAuth };
+      
+      const isAdmin = userType === UserType.ADMIN;
+
+      if(!isAdmin) {
+        throw new UnauthorizedError('UNAUTHORIZED');
+      }
+
+      return next();
+    } catch (error) {
+      return next(error);
+    }
   };
 }
 
